@@ -1,5 +1,6 @@
 [
   {"section" : "overview"},
   {"section" : "mongodb"},
-  {"section" : "mongoid"}
+  {"section" : "mongoid"},
+  {"section" : "end" }
 ]
