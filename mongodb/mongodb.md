@@ -6,7 +6,7 @@
 * horizontally scalable
 * flexible and dynamic
 
-!SLIDE bullets
+!SLIDE bullets incremental
 
 # What is MongoDB?
 
@@ -212,7 +212,6 @@
           nscanned:0 query: { query: {}, orderby: { $natural: -1.0 } }  nreturned:0 bytes:20",
         "millis" : 0 }
 
-
 !SLIDE bullets incremental
 
 # Updating Atomically
@@ -269,3 +268,20 @@
       update : { '$inc' : { qty : -1 }}, new : 1})
 
       {}
+
+!SLIDE bullets incremental
+
+# When to use MongoDB
+
+* Performance!
+* Tree-structured or other non-relational data
+* Accidentally relational data
+* Alongside your relational database
+
+!SLIDE bullets incremental
+
+# When not to use MongoDB?
+
+* Never? Always use it!
+* If you have relational data
+
