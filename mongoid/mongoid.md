@@ -95,3 +95,71 @@
       false,
       true
     );
+
+!SLIDE
+
+# Updating existing embeds_one
+
+   @@@ruby
+   person = Person.where(:first_name => "Dudley").first
+   email = person.email
+   email.address = "dudley@moore.org"
+   email.save
+
+   db.people.update(
+     { "_id" : "4baa56f1230048567300485c" },
+     { "$set" : { "email.address" : "dudley@moore.org" } },
+     false,
+     true
+   );
+
+!SLIDE
+
+# Updating an existing embeds_many
+
+   @@@ruby
+   person = Person.where(:first_name => "Luke").first
+   address = person.addresses.first
+   address.street = "Galactic Way"
+   address.save
+
+   db.people.update(
+     { "_id" : "4baa56f1230048567300485c" },
+     { "$set" : { "addresses.0.street" : "Galactic Way" } },
+     false,
+     true
+   );
+
+!SLIDE
+
+# Deleting an existing embeds_one
+
+   @@@ruby
+   person = Person.where(:first_name => "Boba").first
+   email = person.email
+   email.delete # or destroy
+
+   db.people.update(
+     { "_id" : "4baa56f1230048567300485c" },
+     { "$unset" : { "email" : true } },
+     false,
+     true
+   );
+
+
+!SLIDE
+
+# Deleting an existing embeds_many
+
+   @@@ruby
+   person = Person.where(:first_name => "Boba").first
+   address = person.addresses.first
+   address.delete # or destroy
+
+   db.people.update(
+     { "_id" : "4baa56f1230048567300485c" },
+     { "$pull" : { "addresses" : { "_id" : "4baa56f1230048567300485d" } } },
+     false,
+     true
+   );
+
