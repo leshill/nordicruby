@@ -50,3 +50,48 @@
 
     @@@ ruby
     rails generate model person dob:Date name:String --timestamps
+
+!SLIDE bullets
+
+# Atomic Operations by Default
+
+* $set
+* $push
+* $unset
+* $pull
+
+!SLIDE
+
+# Save new embeds_one on existing parent
+
+    @@@ruby
+    person = Person.where(:first_name => "Greedo").first
+    email = Email.new(:address => "greedo@tt.net")
+    person.email = email
+    email.save
+
+    MongoDB Query:
+    db.people.update(
+      { "_id" : "4baa56f1230048567300485c" },
+      { "$set" : { "email" : { "address" : "greedo@tt.net" } } },
+      false,
+      true
+    );
+
+!SLIDE
+
+# Save new embeds_many on existing parent
+
+    @@@ruby
+    person = Person.where(:first_name => "Ponda").first
+    address = Address.new(:street => "Outer Kerner Way")
+    person.addresses << address
+    address.save
+
+    MongoDB Query:
+    db.people.update(
+      { "_id" : "4baa56f1230048567300485c" },
+      { "$push" : { "addresses" : { "street" : "Outer Kerner Way" } } },
+      false,
+      true
+    );
