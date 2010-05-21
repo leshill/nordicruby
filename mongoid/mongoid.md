@@ -1,32 +1,52 @@
-!SLIDE bullets incremental
+!SLIDE
 
 # Mongoid
-
-* Object Document Mapper
-* Store Ruby objects in MongoDB
-* And query them easily
 
 !SLIDE bullets
 
-# Mongoid
+# Why Mongoid?
 
-* Durran Jordan
-* hashrocket.com
-* @modetojoy
-* github.com/durran/mongoid
+* Rails 3 Compatible
+* Atomic Operations by Default
+* Handles Large Data Sets Easily
+* Badass Criteria API
+
+!SLIDE bullets
+
+# Rails 3 Compatibility
+
+* Gemfile
+* Generate Configuration
+* Modify application.rb
+* Generate Models
 
 !SLIDE
 
-# Inserting a new document
+# Modify Your Gemfile
 
     @@@ ruby
-    jake = Person.new(:last_name => "Sully")
-    jake.save
+    gem "mongoid", "2.0.0.beta6"
+    gem "bson_ext", "1.0.1"
 
-    # MongoDB query:
-    insert([{"created_at"=>Fri Apr 30 15:05:40 UTC 2010,
-      "updated_at"=>Fri Apr 30 15:05:40 UTC 2010,
-      "_id"=>"4bdaf1c42557ab099f00000b",
-      "_type"=>"Person",
-      "clearance_level"=>0,
-      "last_name"=>"Sully"}])
+!SLIDE
+
+# Generate Your Configuration
+
+    @@@ ruby
+    rails generate mongoid:config
+
+!SLIDE
+
+# Modify Your application.rb
+
+    @@@ ruby
+    config.generators do |g|
+      g.orm :mongoid
+    end
+
+!SLIDE
+
+# Generate Models
+
+    @@@ ruby
+    rails generate model person dob:Date name:String --timestamps
