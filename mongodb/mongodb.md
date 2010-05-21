@@ -178,9 +178,9 @@
 
 # Profile
 
-   @@@javascript
-   db.setProfilingLevel(1); // Log ops over 100 ms
-   db.system.profile.find().sort({ $natural : -1 }); // Most recent info first.
+    @@@javascript
+    db.setProfilingLevel(1); // Log ops over 100 ms
+    db.system.profile.find().sort({ $natural : -1 }); // Most recent info first.
 
 !SLIDE bullets incremental
 
