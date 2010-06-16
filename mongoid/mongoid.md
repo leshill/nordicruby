@@ -1,68 +1,49 @@
-!SLIDE
+!SLIDE smbullets incremental
 
 # Mongoid
 
-!SLIDE bullets
-
-# Why Mongoid?
-
-* Rails 3 Compatible
-* Atomic Operations by Default
-* Handles Large Data Sets Easily
-* Badass Criteria API
-
-!SLIDE bullets
-
-# Rails 3 Compatibility
-
-* Gemfile
-* Generate Configuration
-* Modify application.rb
-* Generate Models
+* rails 2 (1.9.x) and rails 3 (2.0.x) compatible
+* atomic operations by default
+* handles large data sets with ease
+* badass criteria api
+* lots of nice extras
+* name is not offensive
+* similar api to datamapper
 
 !SLIDE
 
-# Modify Your Gemfile
+# Documents
 
-    @@@ ruby
-    gem "mongoid", "2.0.0.beta6"
-    gem "bson_ext", "1.0.1"
+    @@@ruby
+    class User
+      include Mongoid::Document
+      field :dob, :type => Date
+      embeds_one :name
+      embeds_many :addresses
 
-!SLIDE
+      referenced_in :organization
+      references_many :posts
+    end
 
-# Generate Your Configuration
+    class Name
+      include Mongoid::Document
+      field :given
+      field :family
+      embedded_in :user,
+        :inverse_of => :name
+    end
 
-    @@@ ruby
-    rails generate mongoid:config
-
-!SLIDE
-
-# Modify Your application.rb
-
-    @@@ ruby
-    config.generators do |g|
-      g.orm :mongoid
+    class Organization
+      include Mongoid::Document
+      field :name
+      references_many :users
     end
 
 !SLIDE
 
-# Generate Models
+# Atomic Updates
 
-    @@@ ruby
-    rails generate model person dob:Date name:String --timestamps
-
-!SLIDE bullets
-
-# Atomic Operations by Default
-
-* $set
-* $push
-* $unset
-* $pull
-
-!SLIDE
-
-# Save new embeds_one on existing parent
+## save new embeds_one
 
     @@@ruby
     person = Person.where(:first_name => "Greedo").first
@@ -80,7 +61,9 @@
 
 !SLIDE
 
-# Save new embeds_many on existing parent
+# Atomic Updates
+
+## save new embeds_many
 
     @@@ruby
     person = Person.where(:first_name => "Ponda").first
@@ -98,7 +81,9 @@
 
 !SLIDE
 
-# Updating existing embeds_one
+# Atomic Updates
+
+## update existing embeds_one
 
     @@@ruby
     person = Person.where(:first_name => "Jabba").first
@@ -106,6 +91,7 @@
     email.address = "jabba@tt.org"
     email.save
 
+    MongoDB Query:
     db.people.update(
       { "_id" : "4baa56f1230048567300485c" },
       { "$set" : { "email.address" : "jabba@tt.org" } },
@@ -115,7 +101,9 @@
 
 !SLIDE
 
-# Updating an existing embeds_many
+# Atomic Updates
+
+## updating existing embeds_many
 
     @@@ruby
     person = Person.where(:first_name => "Luke").first
@@ -123,6 +111,7 @@
     address.street = "Galactic Way"
     address.save
 
+    MongoDB Query:
     db.people.update(
       { "_id" : "4baa56f1230048567300485c" },
       { "$set" : { "addresses.0.street" : "Galactic Way" } },
@@ -132,13 +121,16 @@
 
 !SLIDE
 
-# Deleting an existing embeds_one
+# Atomic Updates
+
+## delete existing embeds_one
 
     @@@ruby
     person = Person.where(:first_name => "Boba").first
     email = person.email
     email.delete # or destroy
 
+    MongoDB Query:
     db.people.update(
       { "_id" : "4baa56f1230048567300485c" },
       { "$unset" : { "email" : true } },
@@ -149,13 +141,16 @@
 
 !SLIDE
 
-# Deleting an existing embeds_many
+# Atomic Updates
+
+## delete existing embeds_many
 
     @@@ruby
     person = Person.where(:first_name => "Boba").first
     address = person.addresses.first
     address.delete # or destroy
 
+    MongoDB Query:
     db.people.update(
       { "_id" : "4baa56f1230048567300485c" },
       { "$pull" : { "addresses" : { "_id" : "4baa56f1230048567300485d" } } },
@@ -163,81 +158,66 @@
       true
     );
 
-!SLIDE bullets
-
-# Large Data Sets and Performance
-
-!SLIDE bullets
-
-# Mongoid
-
-* Saving 10k New Documents                    21.35
-* Querying & Iterating 10k Documents           2.32
-* Updating The Root Document 10k Times         3.20
-* Updating An Embedded Document 10k Times      3.34
-* Appending A New Embedded Document 10k Times  7.51
-
-!SLIDE bullets
-
-# ActiveRecord
-
-* Saving 10k New Objects                                  84.35
-* Querying & Iterating 10k Documents (With Eager Loading)  7.70
-* Updating The Parent Object 10k Times                    15.93
-* Updating An Association 10k Times                       14.34
-* Appending A New Association 10k Times                   61.71
-
-!SLIDE bullets
-
-# Criteria API
-
-* Like ARel
-* Named scopes
-* Class methods
-* Chainable
-
 !SLIDE
 
-# Criteria Basics
+# Criteria
 
     @@@ruby
     Person.where(:first_name => "Jabba")
     Person.where(:first_name.in => [ "Jabba", "Boba" ])
     Person.any_in(:first_name => [ "Han", "Lea" ])
 
-!SLIDE
-
-# Named Scopes
-
-    @@@ruby
-    class Person
+    class User
       include Mongoid::Document
       field :name
-      scope :jabba, where(:name => "Jabba")
+      field :bounties, :type => Integer
+      scope :jabba, where(:name => “Jabba”)
+      scope :kills_over, lambda { |num| where(:bounties.gt => num) }
     end
 
-    Person.jabba
-
-!SLIDE
-
-# Class Methods
-
-    @@@ruby
-    class Person
+    class User
       include Mongoid::Document
       field :name
-      def self.jabba
-        where(:name => "Jabba")
+      class << self
+        def jabba
+          where(:name => “Jabba”)
+        end
       end
     end
 
-    Person.jabba
+!SLIDE
+
+# Chaining Criteria
+
+    @@@ruby
+    User.kills_over(100000)
+      .only(:first_name, :last_name)
+      .where(:first_name.in => [ "Jabba", "Boba" ])
+      .order_by([[ :first_name, Mongo::ASCENDING ]])
+      .skip(10)
+      .limit(25)
+
+## criteria are lazily evaluated
 
 !SLIDE
 
-# Chaining
+# Nested Criteria
 
     @@@ruby
-    Person.only(:first_name, :last_name)
-          .where(:first_name.in => [ "Jabba", "Boba" ])
-          .order_by([[ :first_name, Mongo::ASCENDING ]])
+    person = Person.where(:name => “Luke”)
+    person.addresses
+          .tattoine
+          .skip(10)
+          .limit(20)
+
+!SLIDE smbullets incremental
+
+# Extras
+
+* timestamping
+* versioning
+* master/slave connection support
+* validations, dirty attributes, callbacks a la activemodel and activesupport
+* rails 3 config and model generator
+* indexing
+

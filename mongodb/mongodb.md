@@ -2,14 +2,6 @@
 
 # What is MongoDB?
 
-* richer than a key-value store
-* horizontally scalable
-* flexible and dynamic
-
-!SLIDE bullets incremental
-
-# What is MongoDB?
-
 * '...the best features of key/value stores, document databases and relational databases in one.' &#8212; @jnunemaker
 * 'MongoDB is MySQL on meth' &#8212; @modetojoy
 
@@ -18,67 +10,59 @@
 # MongoDB is...
 
 * documents
-* collections
 * dynamic queries
 * indexes
 * atomic operations
-* map-reduce
+* map/reduce
 
 !SLIDE bullets incremental
 
-# ...Rich Documents
+# Rich Documents
 
-* JSON
+* json
 * not relational
-* not OODB
+* not oodb
 
 !SLIDE bullets incremental
 
-# ...that are Schemaless
+# Schema-Free
 
 * no constraints
-* flexible evolution
 * polymorphic fun!
 
 !SLIDE bullets incremental
 
-# ...Organized into Collections
+# Collections
 
-* just a container
-* queryable
-* indexed
+* simple container
 
 !SLIDE bullets incremental
 
-# ...that can be Queried
+# Querying
 
-* rich set of query operations
+* rich set of operations
 * reach into documents
-* schemaless!
 
 !SLIDE bullets incremental
 
-# ...using Indexes
+# Indexes
 
 * primary index is the `ObjectID`
 * secondary indexes
-* compound indexes
 
 !SLIDE bullets incremental
 
-# ...and updated with Atomic Operations
+# Atomic Operations
 
-* no transactions
 * partial updates
-* 'update if current'
+* no transactions
 
 !SLIDE bullets
 
-# ...and supporting Map/Reduce
+# Map/Reduce
 
-* JavaScript on the server
-* grouping
-* permanent or temporary collections
+* javascript on the server
+* aggregation
 
 <!-- !SLIDE bullets incremental -->
 
@@ -101,22 +85,21 @@
 
 # MongoDB &#8212; What you need to know
 
-* Documents
-* Indexing
-* Atomic Updates
+* documents
+* atomic updates
+* indexing
 
 !SLIDE bullets incremental
 
 # Structuring your Documents
 
 * embedding
-* deep queries
 * referencing another document
 * optimize for queries and atomic updates
 
 !SLIDE
 
-# Tags
+# Embedding
 
     @@@ javascript
     > db.persons.findOne()
@@ -129,9 +112,9 @@
       { name: "Joe", address: { city: "San Francisco", state: "CA" } ,
         likes: [ 'scuba', 'math', 'literature' ] }
 
-!SLIDE
+!SLIDE smaller
 
-# Catalog
+# Complex Doc
 
     @@@ javascript
     > db.products.find({'_id': ObjectID("4bd87bd8277d094c458d2fa5")})
@@ -145,80 +128,27 @@
          label: "Impulse Records",
          issue_date: "December 9, 1964",
          average_customer_review: 4.95,
-         asin: "B0000A118M"
-       },
+         asin: "B0000A118M" },
        pricing: {
         list: 1198,
         retail: 1099,
         savings: 99,
-        pct_savings: 8
-       },
+        pct_savings: 8 },
        categories: [
          ObjectID("4bd87bd8277d094c458d2a43"),
          ObjectID("4bd87bd8277d094c458d2b44"),
          ObjectID("4bd87bd8277d094c458d29a1")
-       ]
-      }
+       ] }
 
-!SLIDE bullets incremental
-
-# Indexing
-
-* only one index is used per query
-* compound indexes
-* indexing options
-
-!SLIDE
-
-# Show me the Indexes
-
-    @@@ javascript
-    > db.people.ensureIndex({ last_name: 1, first_name: 1 })
-    > db.people.find({ last_name : 'Skywalker' }).explain()
-
-      {
-        "cursor" : "BtreeCursor last_name_1_first_name_1",
-        ...
-
-    > db.people.getIndexNames()
-
-      [{ "name" : "_id_",
-      "ns" : "mongoid_test.people",
-      "key" : { "_id" : 1 }
-      },
-      { "_id" : ObjectId("4bf687b80a01c05d77662fc9"),
-      "ns" : "mongoid_test.people",
-      "key" : {
-        "last_name" : 1,
-        "first_name" : 1 },
-      "name" : "last_name_1_first_name_1" }]
-
-    > db.people.find({ last_name : 'Skywalker' }).hint("_id_")
-
-!SLIDE
-
-# Profiling your Queries
-
-    @@@javascript
-    > db.setProfilingLevel(2)
-    > db.system.profile.find().sort({ $natural : -1 })
-
-      { "ts" : "Fri May 21 2010 17:34:59 GMT+0200 (CEST)",
-        "info" : "query mongoid_test.links ntoreturn:1 reslen:140
-          nscanned:1 query: {}  nreturned:1 bytes:124",
-        "millis" : 0 }
-      { "ts" : "Fri May 21 2010 17:34:54 GMT+0200 (CEST)",
-        "info" : "query mongoid_test.system.profile reslen:36
-          nscanned:0 query: { query: {}, orderby: { $natural: -1.0 } }  nreturned:0 bytes:20",
-        "millis" : 0 }
+### from http://kylebanker.com/blog/2010/04/30/mongodb-and-ecommerce
 
 !SLIDE bullets incremental
 
 # Updating Atomically
 
-* No transactions! Oh noes!
-* Leverage partial updates
-* Work on a single document
+* partial updates
+* no transactions! oh noes!
+* optimistic locking
 
 !SLIDE
 
@@ -271,17 +201,66 @@
 
 !SLIDE bullets incremental
 
-# When to use MongoDB
+# Indexing
 
-* Performance!
-* Tree-structured or other non-relational data
-* Accidentally relational data
-* Alongside your relational database
+* compound indexes
+* indexing options
+* only one index is used per query
+
+!SLIDE
+
+# Indexing
+
+    @@@ javascript
+    > db.people.ensureIndex({ last_name: 1, first_name: 1 })
+    > db.people.find({ last_name : 'Skywalker' }).explain()
+
+      {
+        "cursor" : "BtreeCursor last_name_1_first_name_1",
+        ...
+
+    > db.people.getIndexNames()
+
+      [{ "name" : "_id_",
+      "ns" : "mongoid_test.people",
+      "key" : { "_id" : 1 }
+      },
+      { "_id" : ObjectId("4bf687b80a01c05d77662fc9"),
+      "ns" : "mongoid_test.people",
+      "key" : {
+        "last_name" : 1,
+        "first_name" : 1 },
+      "name" : "last_name_1_first_name_1" }]
+
+    > db.people.find({ last_name : 'Skywalker' }).hint("_id_")
+
+!SLIDE
+
+# Profiling
+
+    @@@javascript
+    > db.setProfilingLevel(2)
+    > db.system.profile.find().sort({ $natural : -1 })
+
+      { "ts" : "Fri May 21 2010 17:34:59 GMT+0200 (CEST)",
+        "info" : "query mongoid_test.links
+                  ntoreturn:1
+                  reslen:140
+                  nscanned:1
+                  query: {}
+                  nreturned:1
+                  bytes:124",
+        "millis" : 0 }
 
 !SLIDE bullets incremental
 
 # When not to use MongoDB?
 
-* Never? Always use it!
-* If you have relational data
+* never? always use it!
 
+!SLIDE bullets incremental
+
+# When to use MongoDB
+
+* non-relational data
+* scaling and performance
